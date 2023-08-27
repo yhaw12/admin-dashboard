@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       backgroundImage: {
-        // 'background-image': "url('../../assests/pxfuel.jpg')",
+        'background-image': "url('../../assests/pxfuel.jpg')",
       }
     },
   },
