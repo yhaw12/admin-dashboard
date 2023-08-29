@@ -17,7 +17,7 @@ const db = mysql.createConnection({
 })
 
 
-//signup 
+//signup        
 app.post('/signup',  async (req, res) =>{
     try{
         const {email, password} = req.body;

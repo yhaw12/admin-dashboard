@@ -17,9 +17,9 @@ function Login() {
   const handleLogin = async (e)=>{
     e.preventDefault();
     try{
-      await axios.get('http://localhost:8081/users', {
+      await axios.get('http://localhost:8081/login', {
         email, password
-      })
+      });
     }catch (error){
       console.error(error)
     }

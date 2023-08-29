@@ -24,7 +24,10 @@ function Dashboard() {
       </sidebar>
       <main className='w-screen h-screen'>
         <div className='h-10 shadow-md text-center items-center'><h1>Dashboard Content Area</h1></div>
-        <Outlet/>
+        <div>
+          <Outlet/>
+        </div>
+        
       </main>
 
 
