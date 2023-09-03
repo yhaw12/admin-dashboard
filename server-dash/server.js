@@ -1,55 +1,42 @@
-const cors = require('cors');
-const express = require('express');
-const bcrypt = require('bcrypt');
+const cors = require('cors')
+const express = require('express')
+const mysql = require('mysql')
 
 
-
+const port = 8081
 const app = express();
-app.use(cors());
-
+app.use(cors())
 
 const db = mysql.createConnection({
     host: 'localhost',
-    user: 'root',
+    root: 'root',
     password: '',
-    database: "weblogin"
-
-})
-
-
-//signup        
-app.post('/signup',  async (req, res) =>{
-    try{
-        const {email, password} = req.body;
-        const hashedPassword = await bcrypt.hash(password, 20);
-
-        // Insert user into database
-         const result = await pool.query(
-            'INSERT INTO users (email, password) VALUES (?, ?, ?)',
-            [email, hashedPassword]
-        );
-  
-         res.json({ message: 'Signup successful' });
-
-    } catch (error) {
-        console.log(error)
-    }
-})
-
-// login
-app.get('/users', (req, res)=>{
-    const sql = " SELECT * FROM users";
-    db.query(sql, (err, data) =>{
-        if(err) return res.json(err)
-        return res.json(data)
-    })
-
-})
-
-app.get('/', (req, res)=> {
-    return res.json('backend is working properly')
-})
-
-app.listen(8081, () => {
-    console.log('logon on this server 8081');
+    database: 'weblogin'
 });
+
+app.post('/signup', (req, res)=>{
+    const sql = 'SELECT * FROM users WHERE `email = ?`, `password = ?`, values = (?)'
+
+    const values = [
+        req.body.email,
+        req.body.password
+    ]
+    db.query(sql, (values), (err, data)=>{
+        if (err){
+            console.error(err)
+        } else{
+            return data.json()
+        }
+    })
+})
+
+
+
+
+app.get('/', (req, res)=>{
+    return res.json('The SERVER IS WORKING PROPERLY')
+})
+
+app.listen( port, ()=>{
+    console.log('Server launched succesfully')
+})

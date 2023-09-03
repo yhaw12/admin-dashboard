@@ -22,20 +22,6 @@ const router = createBrowserRouter(
 );
 
 function App() {
-  // const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    axios.get('http://localhost:8081/users')
-      .then(res => {
-        setUsers(res.data);
-        // navigate('/dashboard/employees'); // Corrected path
-      })
-      .catch(err => {
-        console.log(err);
-        // navigate('/signup') // This line can be removed or used as needed
-      });
-  }, []);
 
   return (
     <RouterProvider router={router}>

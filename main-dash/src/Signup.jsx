@@ -1,5 +1,5 @@
   
-import { useState} from 'react';
+import { useEffect, useState} from 'react';
 
 // import {Link} from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Correct import
@@ -14,17 +14,19 @@ import axios from 'axios';
 
 function Signup() {
 
+  const [data, setData] = useState();
 
   const handleSignup = async (e)=>{
     e.preventDefault();
-    try {
-      await axios.post('http://localhost:8081/signup', {
-        email,
-        password,
-      });
-    } catch (error){
-      console.error(error)
+    try{
+     const res = await axios.post('http://localhost:8081/signup', {email, password});
+      if (res.data.success){
+        setData(data);
+      }
+    } catch(err){
+      console.error(err)
     }
+    
   }
 
   const [passIcon, setPassIcon] = useState(false);
