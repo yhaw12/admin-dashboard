@@ -18,7 +18,7 @@ function Dashboard() {
         <div className='p-2 text-white mt-4 cursor-pointer'>
           <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faCalendar} color='white'/><h2 className='pl-2 '>Dashboard</h2></div>
           <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faPeopleGroup} color='white'/><h2 className='pl-2'>Manage Employees</h2></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faPerson} color='white'/><h2 onClick={navigate('/dashboard/profile')} className='pl-2'>Profile</h2></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faPerson} color='white'/><h2 onClick={navigate('/dashboard/profile')} className='pl-2'>Profiless</h2></div>
           <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faCalendar} color='white'/><h2 className='pl-2'>Logout</h2></div>
         </div>
       </sidebar>

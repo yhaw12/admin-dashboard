@@ -17,23 +17,30 @@ function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const[error, SetError] = useState('');
+  const[error, setError] = useState('');
 
-  const handleLogin =  (e)=>{
+  const handleLogin = async (e)=>{
     e.preventDefault();
 
-    axios.post('http://localhost:8081/login', (email, password))
-    .then(res =>{
-      if (res.data.Status === 'Success'){
-        navigate('/signup')
-        console.log('heloo')
-      }else{
-        // SetError(res.data.Error)
+    try {
+      const response = await axios.post('http://localhost:8081/login', {
+        email,
+        password,
+      });
+
+      if (response.data.success) {
+
+        console.log(password) 
+        // Redirect to the dashboard or authenticated page
+
+        navigate('/dashboard')
+      } else {
+        setError('Invalid email or password');
       }
-    })
-    .catch (error=>{
-      console.error(error)
-    })
+    } catch (err) {
+      console.error(err);
+      setError('Internal server error');
+    }
   };
 
   
@@ -41,12 +48,12 @@ function Login() {
     <div className='w-full h-screen grid place-items-center bg-slate-300 bg[url]'>
 
         <div className='w-80 h-80 border m p-8 ' >
-              <div className='w-20 h-10 text-red font-medium'>
+              <div className='w-30 h-10 text-red-500 font-medium'>
               {
                 error && error
               }
             </div>
-            <h1 className='font-bold text-3xl text-center mb-3 '>Login</h1>
+            <h1 className='font-bold text-3xl text-center transition-all mb-3 '>Login</h1>
             <form className='flex flex-col' action="submit" onSubmit={handleLogin}>
                 <div className='w-full flex items-center border mb-2'><input className='border mb-2 p-2 border-none bg-transparent focus:outline-none focus:border-transparent' type="email" value={email} placeholder='Enter Email' onChange={(e)=>setEmail(e.target.value)} /> <FontAwesomeIcon icon={faEnvelope} cursor='pointer' size={20}/> </div>
                 
@@ -60,7 +67,7 @@ function Login() {
                 <button className='bg-[#164A] w-full p-2 rounded-sm pointer' type="submit" >Log In</button>
             </form>
 
-            <p className='mt-2 font-light text-sm'>Don't have an account <Link to='/'> <span className='pointer text-red-500'> Sign up</span></Link></p>
+            <p className='mt-2 font-light text-sm'>Don't have an account <Link to='/signup'> <span className='pointer text-red-500'> Sign up</span></Link></p>
         </div>
     </div>
     

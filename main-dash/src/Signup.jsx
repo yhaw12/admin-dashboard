@@ -17,25 +17,24 @@ function Signup() {
   const navigate = useNavigate();
   const [data, setData] = useState();
   
-  const handleSignup = (e)=>{
+  const handleSignup = async (e)=>{
     e.preventDefault();
 
-    axios.post('http://localhost:8081/signup', {email, password})
-    .then((res) => {
-      if (res.data.Status === "Success"){
-        setData(res.data)
-        console.log('Signup success. Navigating to dashboard...');
-        navigate('/login')
+    try{
+      const res = await axios.post('http://localhost:8081/signup', {email, password});
+      if (res){
+          console.log('Signup success. Navigating to dashboard...');
+          console.log(password)
+          navigate('/login')
       }else{
-        if(res.status!==200){
-          console.error('Error', res.data)
-        }
+          if(res.status!==200){
+            console.error('Error', res.data)
+          }
+        }  
+      }catch (err) {
+      console.error(err);
+      // setError('Internal server error');
       }
-    })
-    .catch((error)=>{
-      console.error('Error', error)
-    })
-
   }
 
   const [passIcon, setPassIcon] = useState(false);
