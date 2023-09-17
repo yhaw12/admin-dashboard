@@ -18,29 +18,20 @@ function Login() {
   const [password, setPassword] = useState('');
 
   const[error, setError] = useState('');
+  
+  // windows.location.setItem = {isLogin: true}
 
-  const handleLogin = async (e)=>{
+  // axios.defaults.withCredentials = true;
+  const handleLogin = (e)=>{
     e.preventDefault();
-
-    try {
-      const response = await axios.post('http://localhost:8081/login', {
-        email,
-        password,
-      });
-
-      if (response.data.success) {
-
-        console.log(password) 
-        // Redirect to the dashboard or authenticated page
-
-        navigate('/dashboard')
-      } else {
-        setError('Invalid email or password');
+    axios.post('http://localhost:8081/login', {email, password})
+    .then(res=>{
+      if (res.data.Status === "Success"){
+        navigate('/login')
+      }else{
+        console.log('Error')
       }
-    } catch (err) {
-      console.error(err);
-      setError('Internal server error');
-    }
+    }).then(err=> console.log(err));
   };
 
   

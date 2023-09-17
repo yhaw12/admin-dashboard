@@ -23,6 +23,8 @@ const router = createBrowserRouter(
 
 function App() {
 
+  // window.Location.getItem = isLogin
+
   return (
     <RouterProvider router={router}>
       {/* Your components and routes go here */}

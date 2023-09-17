@@ -3,14 +3,22 @@ const mysql = require('mysql')
 const bcrypt = require('bcrypt')
 const express = require('express');
 const  jwt = require('jsonwebtoken');
-const cookie = require('cookie-parser');
 const cookieParser = require('cookie-parser');
 
 
+
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: ['http://localhost:5173'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(cookieParser())
+
+// const verifyUser = ()=>{
+
+// }
 
 
 // CONNECTING TO MYSQL DATABASE
@@ -27,56 +35,64 @@ db.connect((err)=>{
     }
     else{
         console.log('MySQL Database Connected Succesfully')
-    }
+    } 
 })
 
 
 // SIGNUP
-app.post('/signup', async(req, res)=>{
+app.post('/signup',async(req, res)=>{
     const sql = 'INSERT INTO users (email, password) VALUES(?,?) ';
 
     const {email, password} = req.body;
+    const salt =10;
 
     try{
-        const salt =10;
         const hashPassword = await bcrypt.hash(password, salt);
-        const values = [email, hashPassword]
 
-        db.query(sql, values, (err, response)=>{
-            if (err){console.log(err,'Error in Database')}
-            else{res.status(200).json('Successfully Signed up')} console.log('Signing Database Working')
-        } )
-    }catch(err){console.error(err)}
+       const values =[
+            email, 
+            hashPassword
+        ]
+        db.query(sql, values, (err, results)=>{
+            if (err){
+                return res.json("Error")
+            }else{
+                return res.json({success: true})
+            }
+        })
+
+    } catch(error){
+        console.error(error)
+    }
+
 })
 
 app.post('/login', (req, res)=>{
-    const sql = 'SELECT * FROM users where email = ?';
-    const {email, password} = req.body;
-
-    db.query(sql, [email], (err, results)=>{
-        if (err){console.log(err,'Error in Database')}
-        if (results.length === 0) {
-            console.log('User not found');
-            return res.status(401).json({ error: 'User not found' });
+    const sql = "SELECT FROM users WHERE `email`=? "
+    db.query(sql, [req.body.email], (err, data)=>{
+        if (err){
+            return res.json("Error")
         }
-
-        const user = results[0]
-        bcrypt.compare(password, user.password, ( err, passMatch)=>{
-            if (err){ console.log(err, 'Database error')}
-
-            if (passMatch){
-                const token = jwt.sign({userID: user.id}, 'secret key', {expiresIn: '1h'})
-                res.cookie('token', token, {httpOnly: true})
-                return res.status(200).json({ message: 'Login successful' });
-            }
-            else{
-                console.log( err, 'password do not match')
-            }
-
-            console.log(user.password)
-        })
+        if (data.length > 0){
+            bcrypt.compare(req.body.password.toString(), data[0].password, (err, response)=>{
+                if (err){
+                    return res.json("Error")
+                }
+                if (response){
+                    const id = data[0].id;
+                    const token = jwt.sign({id}, "secretkey", {expiresIn: '300'});
+                    res.cookie('token', token, {httpOnly: true})
+                    return res.json({Login:true, token, data})
+                }
+                return res.json({Login: false})
+            })
+        }else{
+            console.log('error')
+            return res.json("Failed")
+        }
     })
 })
+
 
 
 
@@ -84,7 +100,7 @@ app.get('/', (req, res)=>{
     return res.json('server is working properly')
 })
 
-
+// APP LSITEN TO SERVER
 port = process.env.PORT || 8081;
 app.listen(port, ()=>{
     console.log('Server is setup properly')
