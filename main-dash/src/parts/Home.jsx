@@ -9,7 +9,7 @@ import Navbar from '../components/Navbar';
 
 function Home() {
 
-  window.localStorage.setItem('isLogin', true);
+localStorage.setItem('token', true);
 
   const navigate = useNavigate();
 

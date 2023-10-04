@@ -1,55 +1,35 @@
 import './App.css';
 import Login from './parts/Login';
-import { useState, useEffect } from 'react';
+// import { useState, useEffect } from 'react';
 import { createBrowserRouter, createRoutesFromElements, Route, RouterProvider, useNavigate } from 'react-router-dom';
 import Home from './parts/Home';
 import Signup from './Signup';
 import Employees from './components/Employees';
 import Profile from './components/Profile';
 import Dashboard from './components/Dashboard';
+import ProtectedRoute from './components/Protectedroute';
 
 const router = createBrowserRouter(
   createRoutesFromElements(
     <Route>
-      <Route path='/login' element={<Login />} />
-      <Route path='/signup' element={<Signup />} />
-      <Route path='/*' element={<Home />}>
-        <Route path='dashboard' element={<Dashboard/>}/>
-        <Route path='employees' element={<Employees />} />
-        <Route path='profile' element={<Profile />} />
-      </Route>
+      <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+      <Route path="dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="employees" element={<ProtectedRoute><Employees /></ProtectedRoute>} />
+      <Route path="profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
     </Route>
   )
 );
 
+
 function App() {
   // CHECK WHETHER THE USER IS LOGIN
 
-  function AppContent(){
-    const navigate = useNavigate();
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
-    useEffect(()=>{
-      setIsLoggedIn(window.localStorage.getItem('isLogin'));
-    },[isLoggedIn, navigate])
-
-    if (!isLoggedIn){
-      navigate('/login')
-    }
-
-    return(
-      <div>
-        {
-          isLoggedIn ? <Dashboard/> : <Login/>
-        }
-      </div>
-    )
-  }
-
-  
   return (
     <RouterProvider router={router}>
       {/* Your components and routes go here */}
-      <AppContent/>
+      
     </RouterProvider>
   );
 }
