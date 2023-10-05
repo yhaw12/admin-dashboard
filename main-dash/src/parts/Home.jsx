@@ -27,7 +27,7 @@ localStorage.setItem('token', true);
     })
   }
 
-
+  
   return (
     <div className='w-full h-screen flex items-center justify-between'>
       <aside className='h-full w-60 bg-slate-900 flex flex-col'>
@@ -36,12 +36,13 @@ localStorage.setItem('token', true);
           <h2 className='pl-4 font-bold text-white cursor-pointer'>Dashboard</h2>
         </div>
         <div className='p-2 text-white mt-4 cursor-pointer'>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faCalendar} color='white'/><Link to='/dashboard'><h2 className='pl-2 '>Dashboard</h2></Link></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faPeopleGroup} color='white'/><Link to='/employees'><h2 className='pl-2'>Manage Orders</h2></Link></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faPerson} color='white'/><Link to='/profile'><h2 className='pl-2'>Profile</h2></Link></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faFlag} color='white'/><Link to='/profile'><h2 className='pl-2'>Reports</h2></Link></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faFlask} color='white'/><Link to='/profile'><h2 className='pl-2'>Cultures</h2></Link></div>
-          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm'><FontAwesomeIcon icon={faCalendar} color='white'/><h2 className='pl-2' onClick={handleLogout}>Logout</h2></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faCalendar} color='white'/><Link to='/dashboard'><h2 className='pl-2 '>Dashboard</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faPeopleGroup} color='white'/><Link to='/employees'><h2 className='pl-2'>Manage Orders</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faPerson} color='white'/><Link to='/profile'><h2 className='pl-2'>Profile</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faFlag} color='white'/><Link to='/clients'><h2 className='pl-2'>Reports/Clients</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faFlag} color='white'/><Link to='/profile'><h2 className='pl-2'>Lab Tests</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faFlask} color='white'/><Link to='/profile'><h2 className='pl-2'>Cultures</h2></Link></div>
+          <div className='flex items-center mb-6 py-2 px-1 bg-slate-700 rounded-sm transition-all duration-300 '><FontAwesomeIcon icon={faCalendar} color='white'/><h2 className='pl-2' onClick={handleLogout}>Logout</h2></div>
         </div>
       </aside>
       <main className='w-screen h-screen'>
@@ -51,9 +52,6 @@ localStorage.setItem('token', true);
         </div>
         
       </main>
-
-
-
     </div>
   )
 }

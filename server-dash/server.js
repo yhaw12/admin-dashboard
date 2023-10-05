@@ -252,15 +252,10 @@ app.get('/', (req, res, next) => {
 
 // Handle logout
 app.get('/logout', (req, res) => {
-  req.session.destroy(err => {
-    if (err) {
-      return res.status(500).json({message: 'Error logging out'});
-    }
-
     res.clearCookie('token');
     res.json({message: 'Logout successful'});
-  });
 });
+
 
 // Server listening
 app.listen(8081, () => {
