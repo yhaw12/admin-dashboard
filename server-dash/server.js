@@ -131,9 +131,9 @@
 
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 const cookie = require('cookie-parser');
 const session = require('express-session');
 
@@ -151,76 +151,68 @@ app.use(session({
   saveUninitialized: true,
   cookie: { secure: true }
 }));
-
-// Connection to the database
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'weblogin',
-});
-
-// Signup users to the database
-app.post('/signup', (req, res) => {
-  const { email, password } = req.body;
-
-  bcrypt.hash(password, 10, function(err, hash) {
-    if (err) {
-      console.error('Error hashing password:', err);
-      return res.status(500).json({ message: 'Error signing up' });
-    }
-
-    const sql = 'INSERT INTO users (email, password) VALUES (?, ?)';
-    const values = [email, hash];
-
-    db.query(sql, values, (err, response) => {
-      if (err) {
-        console.error('Error signing up:', err);
-        return res.status(500).json({ message: 'Error signing up to the database' });
-      }
-
-      if (response.affectedRows > 0) {
-        console.log('Signup success');
-        return res.status(201).json({ message: 'Signup successful' });
-      } else {
-        console.error('Error signing up: No rows affected');
-        return res.status(500).json({ message: 'Error signing up to the database' });
-      }
-    });
+// connect to the database
+mongoose.connect('mongodb://localhost/27017', { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {
+    console.log('Successfully connected to MongoDB');
+  })
+  .catch((error) => {
+    console.error('Error connecting to MongoDB:', error);
   });
-});
 
-// Login users to the database
-app.post('/login', (req, res) => {
-  const sql = 'SELECT * FROM users WHERE email = ?';
+  // create a user schema
+  const UserSchema = new mongoose.Schema({
+    email:{
+        type: String,
+        required: true,
+        unique: true,
+    },
+    password:{
+        type: String, 
+        required: true,
+    }
+});
+// create a model
+const User = mongoose.model('User', UserSchema)
+
+// Signup users
+app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
-  db.query(sql, [email], (err, results) => {
-    if (err) {
-      console.error('Error logging in:', err);
-      return res.status(500).json({ message: 'Error logging in' });
-    }
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ email, password: hashedPassword });
+    await user.save();
+    console.log('Signup success');
+    return res.status(201).json({ message: 'Signup successful' });
+  } catch (error) {
+    console.error('Error signing up:', error);
+    return res.status(500).json({ message: 'Error signing up' });
+  }
+});
 
-    if (results.length === 0) {
+// Login users
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
 
-    const user = results[0];
-
-    bcrypt.compare(password, user.password, function(err, result) {
-      if (err) {
-        return res.status(500).json({ message: 'Error logging in' });
-      }
-
-      if (result) {
-        const token = jwt.sign({userId: user.id}, 'secret-key', {expiresIn: '1d'});
-        res.cookie('token', token, {httpOnly: true});
-        return res.json({ message: 'Login successful' });
-      } else {
-        return res.status(401).json({ message: 'Incorrect password' });
-      }
-    });
-  });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (passwordMatch) {
+      const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1d' });
+      res.cookie('token', token, { httpOnly: true });
+      return res.json({ message: 'Login successful' });
+    } else {
+      return res.status(401).json({ message: 'Incorrect password' });
+    }
+  } catch (error) {
+    console.error('Error logging in:', error);
+    return res.status(500).json({ message: 'Error logging in' });
+  }
 });
 
 // Check for MySQL connection

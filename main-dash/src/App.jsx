@@ -9,6 +9,7 @@ import Profile from './components/Profile';
 import Dashboard from './components/Dashboard';
 import ProtectedRoute from './components/Protectedroute';
 import Clients from './parts/Clients';
+import Upt from './components/Upt';
 
 
 const router = createBrowserRouter(
@@ -19,6 +20,7 @@ const router = createBrowserRouter(
         <Route path="employees" element={<Employees />} />
         <Route path="clients" element={<Clients />} />
         <Route path="profile" element={<Profile />} />
+        <Route path="upt" element={<Upt />} />
       </Route>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />

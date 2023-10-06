@@ -21,6 +21,10 @@ function Clients() {
     {
       name: 'CITY',
       selector: row=>row.address.city
+    },
+    {
+      name : 'ACTIONS',
+      cell: row => <button className="bg-red-500 rounded-sm p-2" onClick={()=>handleDelete(row.id)}>Delete</button>
     }
    ]
     useEffect(()=>{
@@ -42,6 +46,19 @@ function Clients() {
     const handleFilter=(e)=>{
       const newData = filterItems.filter(row=>row.name.toLowerCase().includes(e.target.value));
       setRecords(newData)
+    }
+
+    const handleDelete = ()=>{
+      axios.delete(`https://jsonplaceholder.typicode.com/users/${id}`)
+      .then(res => {
+        const updateRecords = records.filter(row=>row.id !== id);
+        setRecords(updateRecords);
+        setFilterItems(updateRecords);
+      })
+      .catch(err=>console.log(err))
+
+
+
     }
 
   return (
