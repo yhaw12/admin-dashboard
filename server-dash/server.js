@@ -1,134 +1,3 @@
-// const express = require('express');
-// const cors = require('cors');
-// const mysql = require('mysql');
-// // const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken')
-// const cookie = require('cookie-parser')
-// const session = require('express-session')
-
-
-// const app = express();
-// app.use(cors({
-//   origin: 'http://localhost:5173',
-//   methods: ['GET', 'POST'],
-//   credentials: true
-// }));
-// app.use(express.json());
-
-// app.use(session({
-//   secret: 'secret-key',
-//   resave: false,
-//   saveUninitialized: true,
-//   cookie: { secure: true } // secure should be true in a production environment
-// }));
-
-// // CONNECTION TO THE DATABASE
-// const db = mysql.createConnection({
-//   host: 'localhost',
-//   user: 'root',
-//   password: '',
-//   database: 'weblogin',
-// });
-
-// // SIGNUP USERS TO THE DATABASE
-// app.post('/signup', (req, res) => {
-//   const sql = 'INSERT INTO users (email, password) VALUES (?, ?)';
-
-//   const { email, password } = req.body;
-
-//   const values = [email, password];
-
-//   db.query(sql, values, (err, response) => {
-//     if (err) {
-//       console.error('Error signing up:', err);
-//       return res.status(500).json({ message: 'Error signing up to the database' });
-//     }
-
-//     if (response.affectedRows > 0) {
-//       console.log('Signup success');
-//       return res.status(201).json({ message: 'Signup successful' });
-//     } else {
-//       console.error('Error signing up: No rows affected');
-//       return res.status(500).json({ message: 'Error signing up to the database' });
-//     }
-//   });
-// });
-
-
-// // LOGIN USERS TO THE DATABASE
-// app.post('/login', (req, res) => {
-//   const sql = 'SELECT * FROM users WHERE email = ?';
-//   const { email, password } = req.body;
-
-//   db.query(sql, [email], (err, results) => {
-//     if (err) {
-//       console.error('Error logging in:', err);
-//       return res.status(500).json({ message: 'Error logging in' });
-//     }
-
-//     if (results.length === 0) {
-//       return res.status(401).json({ message: 'User not found' });
-//     }
-
-//     const user = results[0];
-
-//     if (password === user.password) {
-//       const token = jwt.sign({userId: user.id}, 'secret-key', {expiresIn: '1d'});
-//       res.cookie('token', token, {httpOnly: true}) 
-//       return res.json({ message: 'Login successful' });
-//     } else {
-//       return res.status(401).json({ message: 'Incorrect password' });
-//     }
-//   });
-// });
-
-
-// // Check for MYSQL CONNECTION
-// db.connect((err) => {
-//   if (err) {
-//     console.error('Error Connecting to the Database:', err);
-//   } else {
-//     console.log('Successfully connected to the database');
-//   }
-// });
-
-
-// app.get('/', (req, res, next)=>{
-//   const token = req.cookies.token;
-
-//   if(!token){
-//     return res.status(401).json({ message: 'Token not found' });
-//   }
-
-//   try{
-//     const decoded = jwt.verify(token, 'secret-key');
-//     const userId = decoded.userId
-//     res.json({ message: 'Token verification successful', userId });
-//   }catch (error) {
-//     return res.status(401).json({ message: 'Invalid token' });
-//   }
-
-//   next()  
-// })
-
-// // HANDLE LOGOUT
-// app.get('/logout', (req, res) => {
-//   req.session.destroy(err => { // use session.destroy, not session.remove
-//     if (err) {
-//       return res.status(500).json({message: 'Error logging out'});
-//     }
-
-//     res.clearCookie('token');
-//     res.json({message: 'Logout successful'});
-//   });
-// });
-
-
-// // SERVER LISTENING
-// app.listen(8081, () => {
-//   console.log('Server Connected');
-// });
-
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -136,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
 const cookie = require('cookie-parser');
 const session = require('express-session');
+const bodyParser = require('body-parser');
 
 const app = express();
 app.use(cors({
@@ -143,22 +13,43 @@ app.use(cors({
   methods: ['GET', 'POST'],
   credentials: true
 }));
+
+app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(express.urlencoded());
 app.use(express.json());
 app.use(cookie());
 app.use(session({
   secret: 'secret-key',
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: true }
+  cookie: { secure: false }
 }));
+
 // connect to the database
-mongoose.connect('mongodb://localhost/27017', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect("mongodb://localhost:27017/labwebsite", {
+     useNewUrlParser: true,
+     useUnifiedTopology: true,
+})
   .then(() => {
     console.log('Successfully connected to MongoDB');
-  })
+  } )
   .catch((error) => {
     console.error('Error connecting to MongoDB:', error);
   });
+
+  // CHECK MONGODB CONNECTION
+  mongoose.connection.on('connected', function() {
+    console.log('Mongoose connected successfully');
+  });
+  
+  mongoose.connection.on('error', function(err) {
+    console.error('Mongoose connection error:', err);
+  });
+  
+  mongoose.connection.on('disconnected', function() {
+    console.log('Mongoose disconnected');
+  });
+  
 
   // create a user schema
   const UserSchema = new mongoose.Schema({
@@ -173,17 +64,24 @@ mongoose.connect('mongodb://localhost/27017', { useNewUrlParser: true, useUnifie
     }
 });
 // create a model
-const User = mongoose.model('User', UserSchema)
+const Items = mongoose.model("users", UserSchema)
 
 // Signup users
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
 
+  
+  const hashedPassword = await bcrypt.hash(password, 10);
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword });
-    await user.save();
-    console.log('Signup success');
+    
+    const user = await Items.findOne({email});
+    if (user){
+      return res.json('User EXist');
+    }
+    await Items.create({
+      email:email,
+      password:hashedPassword
+    });
     return res.status(201).json({ message: 'Signup successful' });
   } catch (error) {
     console.error('Error signing up:', error);
@@ -196,7 +94,7 @@ app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await items.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
     }
@@ -215,14 +113,6 @@ app.post('/login', async (req, res) => {
   }
 });
 
-// Check for MySQL connection
-db.connect((err) => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-  } else {
-    console.log('Successfully connected to the database');
-  }
-});
 
 app.get('/', (req, res, next) => {
   const token = req.cookies.token;
