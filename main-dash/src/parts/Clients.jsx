@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import axios from "axios";
 import DataTable from 'react-data-table-component'
-
+import { useParams } from "react-router-dom";
 
 function Clients() {
 

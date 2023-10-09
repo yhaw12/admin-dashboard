@@ -1,8 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+// const jwt = require('jsonwebtoken');
+const mysql = require('mysql');
 const cookie = require('cookie-parser');
 const session = require('express-session');
 const bodyParser = require('body-parser');
@@ -26,91 +26,109 @@ app.use(session({
 }));
 
 // connect to the database
-mongoose.connect("mongodb://localhost:27017/labwebsite", {
-     useNewUrlParser: true,
-     useUnifiedTopology: true,
-})
-  .then(() => {
-    console.log('Successfully connected to MongoDB');
-  } )
-  .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
-  });
-
-  // CHECK MONGODB CONNECTION
-  mongoose.connection.on('connected', function() {
-    console.log('Mongoose connected successfully');
-  });
-  
-  mongoose.connection.on('error', function(err) {
-    console.error('Mongoose connection error:', err);
-  });
-  
-  mongoose.connection.on('disconnected', function() {
-    console.log('Mongoose disconnected');
-  });
-  
-
-  // create a user schema
-  const UserSchema = new mongoose.Schema({
-    email:{
-        type: String,
-        required: true,
-        unique: true,
-    },
-    password:{
-        type: String, 
-        required: true,
-    }
+const db = mysql.createConnection({
+  host: 'localhost',
+  user: 'root',
+  password: '',
+  database: 'weblogin'
 });
-// create a model
-const Items = mongoose.model("users", UserSchema)
+
+db.connect((err)=>{
+  if (err){
+    console.log('Error Connectinng to the database');
+    return;
+  }
+  else{
+    console.log('Mysql Database Connected')
+  }
+})
+
 
 // Signup users
 app.post('/signup', async (req, res) => {
   const { email, password } = req.body;
-
-  
   const hashedPassword = await bcrypt.hash(password, 10);
-  try {
-    
-    const user = await Items.findOne({email});
-    if (user){
-      return res.json('User EXist');
+  
+  // First, check if the user already exists before attempting to insert
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (error, results) => {
+    if (error) {
+      console.error('Error checking for existing user:', error);
+      return res.status(500).json({ message: 'Error signing up' });
     }
-    await Items.create({
-      email:email,
-      password:hashedPassword
-    });
-    return res.status(201).json({ message: 'Signup successful' });
-  } catch (error) {
-    console.error('Error signing up:', error);
-    return res.status(500).json({ message: 'Error signing up' });
-  }
+    
+    // If there are results (i.e., the user already exists), return an error message
+    if (results.length > 0) {
+      return res.status(409).json({ message: 'User already exists' });
+    } else {
+      // If the user doesn't exist, insert the new user
+      db.query('INSERT INTO users (email, password) VALUES (?, ?)', [email, hashedPassword], (error, results) => {
+        if (error) {
+          console.error('Error signing up:', error);
+          return res.status(500).json({ message: 'Error signing up' });
+        }
+        
+        return res.status(201).json({ message: 'Signup successful' });
+      });
+    }
+  });
 });
 
+
+
+
 // Login users
+// app.post('/login', async (req, res) => {
+//   const { email, password } = req.body;
+
+//   try {
+//     const user = await Item.findOne({ email });
+//     if (!user) {
+//       return res.status(401).json({ message: 'User not found' });
+//     }
+
+//     const passwordMatch = await bcrypt.compare(password, user.password);
+//     if (passwordMatch) {
+//       const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1d' });
+//       res.cookie('token', token, { httpOnly: true });
+//       return res.json({ message: 'Login successful' });
+//     } else {
+//       return res.status(401).json({ message: 'Incorrect password' });
+//     }
+//   } catch (error) {
+//     console.error('Error logging in:', error);
+//     return res.status(500).json({ message: 'Error logging in' });
+//   }
+// });
+
+// Login endpoint
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
 
-  try {
-    const user = await items.findOne({ email });
-    if (!user) {
-      return res.status(401).json({ message: 'User not found' });
+  // Check if the user exists
+  db.query('SELECT * FROM users WHERE email = ?', [email], async (error, results) => {
+    if (error) {
+      console.error('Error during login:', error);
+      return res.status(500).json({ message: 'Error during login' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
-    if (passwordMatch) {
-      const token = jwt.sign({ userId: user._id }, 'secret-key', { expiresIn: '1d' });
-      res.cookie('token', token, { httpOnly: true });
-      return res.json({ message: 'Login successful' });
-    } else {
-      return res.status(401).json({ message: 'Incorrect password' });
+    // If no user with the given email is found, return an error
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Authentication failed' });
     }
-  } catch (error) {
-    console.error('Error logging in:', error);
-    return res.status(500).json({ message: 'Error logging in' });
-  }
+
+    const user = results[0];
+
+    // Compare the provided password with the hashed password in the database
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Authentication failed' });
+    }
+
+    // If the password is valid, you can create a JWT or a session for authentication
+    // For simplicity, we'll just return a success message here
+    return res.status(201).json({ message: 'Login successful' });
+  });
 });
 
 

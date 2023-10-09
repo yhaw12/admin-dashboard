@@ -4,6 +4,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope, faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 
+// import {toast} from 'react-toastify'; 
+
 function Login() {
   const navigate = useNavigate();
   const [passIcon, setPassIcon] = useState(false);
@@ -26,7 +28,7 @@ function Login() {
 
     axios.post('http://localhost:8081/login', values)
     .then(data =>{
-      if (data) {
+      if (data.status === 201) {
         console.log('login successful');
         navigate('/dashboard');
         console.log(data.data.message)
